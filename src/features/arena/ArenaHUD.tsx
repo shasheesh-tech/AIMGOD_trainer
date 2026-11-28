@@ -15,7 +15,7 @@ interface ArenaHUDProps {
   onAbort: () => void;
 }
 
-export const ArenaHUD: React.FC<ArenaHUDProps> = ({
+export const ArenaHUD: React.FC<ArenaHUDProps> = React.memo(({
   timeLeft,
   score,
   hits,
@@ -26,8 +26,6 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({
   lastFeedback,
   onAbort,
 }) => {
-  const isFeedbackRecent = lastFeedback && Date.now() - lastFeedback.time < 180;
-
   return (
     <div className="absolute inset-0 pointer-events-none select-none z-20 flex flex-col justify-between p-4 sm:p-6">
       {/* Top Telemetry Header */}
@@ -114,12 +112,13 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({
       </div>
 
       {/* Screen Edge Hit / Miss Feedback Flash */}
-      {isFeedbackRecent && (
+      {lastFeedback && (
         <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${
-            lastFeedback?.type === 'hit'
-              ? 'border-4 border-brand-cyan/40 bg-brand-cyan/5'
-              : 'border-4 border-brand-rose/40 bg-brand-rose/5'
+          key={`${lastFeedback.type}-${lastFeedback.time}`}
+          className={`absolute inset-0 pointer-events-none animate-feedback-flash ${
+            lastFeedback.type === 'hit'
+              ? 'border-2 border-brand-cyan/35'
+              : 'border-2 border-brand-rose/40 bg-brand-rose/5'
           }`}
         />
       )}
@@ -153,4 +152,4 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({
       </div>
     </div>
   );
-};
+});

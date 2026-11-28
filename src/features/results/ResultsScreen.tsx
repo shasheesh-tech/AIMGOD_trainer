@@ -4,6 +4,7 @@ import { SessionResult } from '../../types';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import { InteractiveParticleObject } from '../../components/three/InteractiveParticleObject';
 
 interface ResultsScreenProps {
   result: SessionResult | null;
@@ -72,16 +73,28 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
       </div>
 
       {/* Primary Score Highlight */}
-      <div className="relative rounded-2xl bg-gradient-to-b from-dark-900 to-dark-950 border border-brand-cyan/40 p-8 text-center shadow-glow-cyan overflow-hidden">
-        <div className="absolute top-0 right-1/2 translate-x-1/2 w-64 h-32 bg-brand-cyan/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="text-xs font-mono uppercase tracking-widest text-brand-cyan flex items-center justify-center gap-1.5 mb-1">
-          <Trophy className="w-4 h-4" /> TOTAL SCORE
-        </div>
-        <div className="text-5xl sm:text-7xl font-display font-black text-slate-100 tracking-tight text-glow-cyan">
-          {result.score.toLocaleString()}
-        </div>
-        <div className="text-xs font-mono text-slate-400 mt-2">
-          {result.hits} targets eliminated &bull; {result.avgReactionTimeMs > 0 ? `${result.avgReactionTimeMs}ms average reaction` : 'Instant execution'}
+      <div className="lab-panel relative rounded-lg bg-[#0a0b0e]/55 border border-[#35383E]/75 backdrop-blur-[3px] p-6 sm:p-8 overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex-1 text-center md:text-left">
+            <div className="text-xs font-mono uppercase tracking-widest text-[#BEC7D7] flex items-center justify-center md:justify-start gap-1.5 mb-1">
+              <Trophy className="w-4 h-4" /> TOTAL SCORE
+            </div>
+            <div className="text-5xl sm:text-7xl font-display font-bold text-[#E4E2E3] tracking-tight">
+              {result.score.toLocaleString()}
+            </div>
+            <div className="text-xs font-mono text-[#9FA4AE] mt-2">
+              {result.hits} targets eliminated &bull; {result.avgReactionTimeMs > 0 ? `${result.avgReactionTimeMs}ms average reaction` : 'Instant execution'}
+            </div>
+          </div>
+
+          <div className="w-48 h-44 sm:w-56 sm:h-48 shrink-0 rounded-lg bg-[#050608]/50 border border-[#35383E]/75 overflow-hidden">
+            <InteractiveParticleObject
+              variant="precision_target"
+              scale={1.16}
+              className="w-full h-full"
+              hint="DRAG PRECISION CORE"
+            />
+          </div>
         </div>
       </div>
 

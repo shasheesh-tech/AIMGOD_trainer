@@ -24,6 +24,15 @@ export type ArenaTheme =
   | 'ember_forge'
   | 'deep_ocean';
 
+export type CrosshairStyle =
+  | 'dot'
+  | 'plus'
+  | 'diamond'
+  | 'open_plus'
+  | 'plus_no_center';
+
+export const DEFAULT_CROSSHAIR: CrosshairStyle = 'plus';
+
 /**
  * Scale conversion: 1 virtual mm = 0.003 Three.js units.
  * Preset radii in scene units:
@@ -54,6 +63,7 @@ export interface SessionConfig {
   /** Only used when targetSize === 'custom'. Virtual diameter in mm. */
   customSizeMm: number;
   arenaTheme: ArenaTheme;
+  crosshair: CrosshairStyle;
 }
 
 export interface SessionResult {

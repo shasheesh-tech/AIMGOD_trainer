@@ -4,6 +4,7 @@ import { UserProfile } from '../../types';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import { InteractiveParticleObject } from '../../components/three/InteractiveParticleObject';
 
 interface AuthPlaceholderScreenProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -43,9 +44,23 @@ export const AuthPlaceholderScreen: React.FC<AuthPlaceholderScreenProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto py-8 animate-fade-in space-y-6">
+    <div className="relative max-w-md mx-auto py-8 animate-fade-in space-y-6">
+      {/* Subtle non-blocking ambient 3D reticle behind auth header */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 w-72 h-72 z-0"
+      >
+        <InteractiveParticleObject
+          variant="scope"
+          scale={1.05}
+          interactive={false}
+          opacity={0.34}
+          className="w-full h-full"
+        />
+      </div>
+
       {/* Brand Header */}
-      <div className="text-center space-y-2">
+      <div className="relative z-10 text-center space-y-2">
         <Badge variant="cyan" size="md">
           STAGE 2 CLOUD INTEGRATION READY
         </Badge>
@@ -58,7 +73,7 @@ export const AuthPlaceholderScreen: React.FC<AuthPlaceholderScreenProps> = ({
       </div>
 
       {/* Auth Card */}
-      <Card glow className="p-6">
+      <Card glow className="relative z-10 p-6">
         {/* Tab Switcher */}
         <div className="grid grid-cols-2 gap-2 p-1 bg-dark-950/80 rounded-lg border border-dark-800 mb-6">
           <button

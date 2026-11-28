@@ -7,14 +7,20 @@ import {
   SIZE_PRESETS,
   CUSTOM_SIZE_DEFAULT_MM,
 } from '../../types';
-import { ArenaScene, ActiveTarget } from './ArenaScene';
+import { ArenaScene, ActiveTarget, DyingTarget } from './ArenaScene';
 import { ArenaHUD } from './ArenaHUD';
+import { getCrosshairCursorCss } from '../../utils/crosshair';
 
 interface ArenaScreenProps {
   config: SessionConfig;
   onFinishSession: (result: SessionResult) => void;
   onExit: () => void;
 }
+
+const CANVAS_CAMERA = { position: [0, 0, 7.5] as [number, number, number], fov: 50 };
+const CANVAS_GL = { antialias: true, alpha: false, powerPreference: 'high-performance' as const };
+const CANVAS_DPR: [number, number] = [1, 2];
+const HIT_TRANSITION_MS = 105;
 
 /** Convert SessionConfig size settings to a Three.js scene radius */
 function configToRadius(config: SessionConfig): number {
@@ -42,8 +48,11 @@ export const ArenaScreen: React.FC<ArenaScreenProps> = ({
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
   const [lastFeedback, setLastFeedback] = useState<{ type: 'hit' | 'miss'; time: number } | null>(null);
 
-  // 3 active targets
+  // 3 active targets + transient hit-disappear visuals
   const [targets, setTargets] = useState<ActiveTarget[]>([]);
+  const [dyingTargets, setDyingTargets] = useState<DyingTarget[]>([]);
+  const targetsRef = useRef<ActiveTarget[]>([]);
+  const dyingTimeoutsRef = useRef<Set<number>>(new Set());
 
   // Minimum scene-space gap between target centres (scale with radius)
   const minDistance = Math.max(1.0, targetRadius * 8);
@@ -79,8 +88,18 @@ export const ArenaScreen: React.FC<ArenaScreenProps> = ({
         spawnTime: now,
       });
     }
+    targetsRef.current = initial;
     setTargets(initial);
   }, [generateNewPosition]);
+
+  // Clear pending hit-transition cleanup timers on unmount
+  useEffect(() => {
+    const timeouts = dyingTimeoutsRef.current;
+    return () => {
+      timeouts.forEach((tid) => window.clearTimeout(tid));
+      timeouts.clear();
+    };
+  }, []);
 
   // Pre-match countdown then start playing
   useEffect(() => {
@@ -158,29 +177,47 @@ export const ArenaScreen: React.FC<ArenaScreenProps> = ({
   const handleTargetHit = useCallback(
     (hitId: string) => {
       if (!isPlayingRef.current || hasEndedRef.current) return;
+
+      const currentTargets = targetsRef.current;
+      const hitTarget = currentTargets.find((t) => t.id === hitId);
+      if (!hitTarget) return;
+
       const now = performance.now();
+      const reactionMs = Math.round(now - hitTarget.spawnTime);
+      const speedBonus = Math.max(0, Math.min(150, Math.round((600 - reactionMs) * 0.4)));
 
-      setTargets((prev) => {
-        const hitTarget = prev.find((t) => t.id === hitId);
-        if (!hitTarget) return prev;
+      const remaining = currentTargets.filter((t) => t.id !== hitId);
+      // Also avoid the hit target's position so replacement doesn't overlap the disappear transition
+      const newPos = generateNewPosition([
+        ...remaining.map((t) => t.position),
+        hitTarget.position,
+      ]);
+      const replacement: ActiveTarget = {
+        id: `tgt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        position: newPos,
+        spawnTime: now,
+      };
 
-        const reactionMs = Math.round(now - hitTarget.spawnTime);
-        setReactionTimes((r) => [...r, reactionMs]);
-        const speedBonus = Math.max(0, Math.min(150, Math.round((600 - reactionMs) * 0.4)));
-        setScore((s) => s + 100 + speedBonus);
-        setHits((h) => h + 1);
+      const nextTargets = [...remaining, replacement];
+      targetsRef.current = nextTargets;
+      setTargets(nextTargets);
 
-        const remaining = prev.filter((t) => t.id !== hitId);
-        const newPos = generateNewPosition(remaining.map((t) => t.position));
-        const replacement: ActiveTarget = {
-          id: `tgt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          position: newPos,
-          spawnTime: now,
-        };
-        return [...remaining, replacement];
-      });
+      // Brief, non-blocking disappear transition at the hit location
+      const dyingId = `${hitTarget.id}_hit_${Math.random().toString(36).slice(2, 6)}`;
+      setDyingTargets((prev) => [
+        ...prev,
+        { id: dyingId, position: hitTarget.position, hitTime: now },
+      ]);
+      const tid = window.setTimeout(() => {
+        setDyingTargets((prev) => prev.filter((d) => d.id !== dyingId));
+        dyingTimeoutsRef.current.delete(tid);
+      }, HIT_TRANSITION_MS);
+      dyingTimeoutsRef.current.add(tid);
 
-      setLastFeedback({ type: 'hit', time: Date.now() });
+      setReactionTimes((r) => [...r, reactionMs]);
+      setScore((s) => s + 100 + speedBonus);
+      setHits((h) => h + 1);
+      setLastFeedback({ type: 'hit', time: now });
     },
     [generateNewPosition]
   );
@@ -188,7 +225,11 @@ export const ArenaScreen: React.FC<ArenaScreenProps> = ({
   const handleMissClick = useCallback(() => {
     if (!isPlayingRef.current || hasEndedRef.current) return;
     setMisses((m) => m + 1);
-    setLastFeedback({ type: 'miss', time: Date.now() });
+    setLastFeedback({ type: 'miss', time: performance.now() });
+  }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
   }, []);
 
   const totalClicks = hits + misses;
@@ -201,7 +242,7 @@ export const ArenaScreen: React.FC<ArenaScreenProps> = ({
   return (
     <div
       className="relative w-full h-[calc(100vh-8.5rem)] rounded-2xl overflow-hidden bg-dark-950 border border-dark-750 shadow-2xl select-none"
-      onContextMenu={(e) => e.preventDefault()}
+      onContextMenu={handleContextMenu}
     >
       <ArenaHUD
         timeLeft={timeLeft}
@@ -215,14 +256,18 @@ export const ArenaScreen: React.FC<ArenaScreenProps> = ({
         onAbort={onExit}
       />
 
-      <div className="w-full h-full cursor-crosshair">
+      <div
+        className="w-full h-full"
+        style={{ cursor: getCrosshairCursorCss(config.crosshair) }}
+      >
         <Canvas
-          camera={{ position: [0, 0, 7.5], fov: 50 }}
-          gl={{ antialias: true, alpha: false }}
-          dpr={[1, 2]}
+          camera={CANVAS_CAMERA}
+          gl={CANVAS_GL}
+          dpr={CANVAS_DPR}
         >
           <ArenaScene
             targets={targets}
+            dyingTargets={dyingTargets}
             shape={config.targetShape}
             targetRadius={targetRadius}
             customUrl={config.customTargetUrl}

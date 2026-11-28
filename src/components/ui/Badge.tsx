@@ -17,23 +17,23 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   const sizeStyles = {
     sm: 'text-[10px] px-2 py-0.5 tracking-wider',
-    md: 'text-xs px-2.5 py-1 tracking-widest',
+    md: 'text-[11px] px-2.5 py-0.5 tracking-widest',
   };
 
   const variantStyles = {
-    cyan: 'bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/30',
+    cyan: 'bg-[#2A2B2F]/50 text-[#BEC7D7] border border-[#8F9196]/55',
     amber: 'bg-brand-amber/10 text-brand-amber border border-brand-amber/30',
     emerald: 'bg-brand-emerald/10 text-brand-emerald border border-brand-emerald/30',
     rose: 'bg-brand-rose/10 text-brand-rose border border-brand-rose/30',
-    neutral: 'bg-dark-750 text-slate-300 border border-dark-600',
+    neutral: 'bg-[#1F2023]/60 text-[#C5C6CC] border border-[#35383E]',
   };
 
   const dotStyles = {
-    cyan: 'bg-brand-cyan',
+    cyan: 'bg-[#BEC7D7]',
     amber: 'bg-brand-amber',
     emerald: 'bg-brand-emerald',
     rose: 'bg-brand-rose',
-    neutral: 'bg-slate-400',
+    neutral: 'bg-[#9FA4AE]',
   };
 
   return (

@@ -8,6 +8,8 @@ import {
 } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import { InteractiveParticleObject } from '../../components/three/InteractiveParticleObject';
+import { CrosshairPreview, getCrosshairLabel } from '../../utils/crosshair';
 
 interface ArenaReadyScreenProps {
   config: SessionConfig;
@@ -58,72 +60,72 @@ export const ArenaReadyScreen: React.FC<ArenaReadyScreenProps> = ({
 
   return (
     <div className="max-w-2xl mx-auto py-8 animate-fade-in space-y-8">
-      {/* Glowing crosshair hero */}
-      <div className="text-center space-y-4">
-        <div className="relative inline-flex items-center justify-center">
-          {/* Outer glow ring animation */}
-          <div className="absolute w-32 h-32 rounded-full bg-brand-cyan/10 animate-ping" style={{ animationDuration: '2s' }} />
-          <div className="absolute w-24 h-24 rounded-full bg-brand-cyan/15 animate-pulse" />
-          <div className="relative w-20 h-20 rounded-full bg-dark-900 border-2 border-brand-cyan/70 shadow-glow-cyan flex items-center justify-center">
-            <Crosshair className="w-10 h-10 text-brand-cyan" />
-          </div>
+      {/* Interactive 3D Ballistic Projectile Hero */}
+      <div className="text-center space-y-3">
+        <div className="w-72 h-44 sm:w-80 sm:h-48 mx-auto rounded-lg bg-[#050608]/50 border border-[#35383E]/75 overflow-hidden">
+          <InteractiveParticleObject
+            variant="projectile"
+            scale={1.18}
+            className="w-full h-full"
+            hint="DRAG 3D PROJECTILE"
+          />
         </div>
         <div>
           <Badge variant="cyan" size="md" pulse>READY TO ENGAGE</Badge>
-          <h1 className="mt-2 text-3xl sm:text-4xl font-display font-black text-slate-100 uppercase tracking-wide">
+          <h1 className="mt-2 text-3xl sm:text-4xl font-display font-bold text-[#E4E2E3] uppercase tracking-wide">
             Arena Briefing
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Review your session parameters below, then press <strong className="text-brand-cyan">Start Session</strong> to begin the countdown.
+          <p className="text-sm text-[#9FA4AE] mt-1">
+            Review your session parameters below, then press <strong className="text-[#E4E2E3]">Start Session</strong> to begin the countdown.
           </p>
         </div>
       </div>
 
       {/* Config summary card */}
-      <div className="rounded-2xl bg-dark-900/90 border border-brand-cyan/25 shadow-glow-cyan-sm overflow-hidden">
+      <div className="lab-panel rounded-lg bg-[#0a0b0e]/55 border border-[#35383E]/75 backdrop-blur-[3px] overflow-hidden">
         {/* Card header */}
-        <div className="px-6 py-4 border-b border-dark-800 bg-dark-950/60">
-          <span className="text-xs font-mono text-slate-400 uppercase tracking-widest">Mission Parameters</span>
+        <div className="px-6 py-3.5 border-b border-[#35383E]/60">
+          <span className="text-xs font-mono text-[#9FA4AE] uppercase tracking-widest">Mission Parameters</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-dark-800/60">
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-[#35383E]/55">
           {/* Mode */}
           <div className="p-4 space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#9FA4AE] uppercase tracking-widest">
               <Target className="w-3 h-3" /> Mode
             </div>
-            <div className="text-xs font-display font-bold text-slate-200 uppercase">Static Practice</div>
+            <div className="text-xs font-display font-bold text-[#E4E2E3] uppercase">Static Practice</div>
           </div>
 
           {/* Duration */}
           <div className="p-4 space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#9FA4AE] uppercase tracking-widest">
               <Clock className="w-3 h-3" /> Duration
             </div>
-            <div className="text-lg font-display font-black text-brand-cyan">
+            <div className="text-lg font-display font-bold text-[#BEC7D7]">
               {config.duration}s
             </div>
           </div>
 
           {/* Shape */}
           <div className="p-4 space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#9FA4AE] uppercase tracking-widest">
               <Sliders className="w-3 h-3" /> Target
             </div>
-            <div className="text-xs font-display font-bold text-slate-200 uppercase">{shapeLabel}</div>
+            <div className="text-xs font-display font-bold text-[#E4E2E3] uppercase">{shapeLabel}</div>
           </div>
 
           {/* Size */}
           <div className="p-4 space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#9FA4AE] uppercase tracking-widest">
               <Maximize2 className="w-3 h-3" /> Size
             </div>
-            <div className="text-xs font-display font-bold text-slate-200 uppercase leading-tight">{sizeLabel}</div>
+            <div className="text-xs font-display font-bold text-[#E4E2E3] uppercase leading-tight">{sizeLabel}</div>
           </div>
 
           {/* Theme — spans half */}
           <div className="col-span-2 p-4 space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#9FA4AE] uppercase tracking-widest">
               <Palette className="w-3 h-3" /> Arena
             </div>
             <div className={`text-xs font-display font-bold uppercase ${themeAccent}`}>
@@ -131,9 +133,24 @@ export const ArenaReadyScreen: React.FC<ArenaReadyScreenProps> = ({
             </div>
           </div>
 
+          {/* Crosshair — spans half */}
+          <div className="col-span-2 p-4 space-y-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#9FA4AE] uppercase tracking-widest">
+              <Crosshair className="w-3 h-3" /> Crosshair
+            </div>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded bg-[#050608]/75 border border-[#8F9196]/55 flex items-center justify-center shrink-0">
+                <CrosshairPreview style={config.crosshair ?? 'plus'} size={22} active />
+              </div>
+              <span className="text-xs font-display font-bold uppercase text-[#BEC7D7]">
+                {getCrosshairLabel(config.crosshair ?? 'plus')}
+              </span>
+            </div>
+          </div>
+
           {/* Custom PNG notice if applicable */}
           {config.targetShape === 'custom' && config.customTargetUrl && (
-            <div className="col-span-2 p-4 space-y-1">
+            <div className="col-span-2 sm:col-span-4 p-4 space-y-1">
               <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Custom PNG</div>
               <div className="flex items-center gap-2">
                 <img

@@ -23,34 +23,31 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <div
-      className={`relative rounded-xl bg-dark-900/90 border transition-all duration-200 backdrop-blur-md overflow-hidden ${
+      className={`lab-panel relative rounded-lg bg-[#0a0b0e]/55 border transition-colors duration-150 backdrop-blur-[3px] flex flex-col ${
         glow
-          ? 'border-brand-cyan/40 shadow-glow-cyan-sm'
-          : 'border-dark-750 hover:border-dark-600'
+          ? 'border-[#8F9196]/65'
+          : 'border-[#35383E]/75 hover:border-[#8F9196]/55'
       } ${className}`}
     >
-      {/* Subtle corner light accent */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-brand-cyan/5 rounded-full blur-2xl pointer-events-none" />
-
       {(title || subtitle || badge || icon || headerAction) && (
-        <div className="flex items-center justify-between px-5 py-4 border-b border-dark-800/80 bg-dark-950/40">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#35383E]/55">
+          <div className="flex items-center gap-2.5">
             {icon && (
-              <div className="p-2 rounded-lg bg-dark-800 border border-dark-700 text-brand-cyan">
+              <div className="w-8 h-8 rounded border border-[#8F9196]/40 bg-[#1F2023]/40 flex items-center justify-center text-[#BEC7D7] shrink-0">
                 {icon}
               </div>
             )}
             <div>
               <div className="flex items-center gap-2">
                 {title && (
-                  <h3 className="font-display font-bold text-sm tracking-wide text-slate-100 uppercase">
+                  <h3 className="font-display font-semibold text-xs tracking-wider text-[#E4E2E3] uppercase">
                     {title}
                   </h3>
                 )}
                 {badge}
               </div>
               {subtitle && (
-                <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+                <p className="text-[11px] text-[#9FA4AE] mt-0.5">{subtitle}</p>
               )}
             </div>
           </div>
@@ -58,7 +55,7 @@ export const Card: React.FC<CardProps> = ({
         </div>
       )}
 
-      <div className="p-5">{children}</div>
+      <div className="p-4 flex-1 flex flex-col">{children}</div>
     </div>
   );
 };
